@@ -3,8 +3,6 @@ function App() {
   var VIEWPORT_WIDTH = 1.2;
   var VIEWPORT_HEIGTH = 0.9;
 
-  var small_window_for_debug = false;
-
   var phong_exponent = 100;
 
   var balls = [
@@ -42,7 +40,7 @@ function App() {
         SetPixel(currentImageData, x, y, color, 1.0);
       }
       currentProgress = x / Width();
-      if (!small_window_for_debug && Now() - startTime > 100)
+      if (Now() - startTime > 100)
       {
         currentLine = x + 1;
         setTimeout(DrawInternal, 1);
@@ -197,18 +195,30 @@ function App() {
     imageData.data[index+3] = Math.max(Math.min(a * 255, 255), 0);
   }
 
-  this.Start = function() {
+  this.Start = function(size) {
     GetCanvas().style.backgroundColor = "#ffffff";
     document.body.style.backgroundColor = "#ffffff";
 
-    if (small_window_for_debug)
+    var w = 1200;
+    var h = 900;
+
+
+    if (size == "medium")
     {
-      GetCanvas().width = 120*3;
-      GetCanvas().height = 90*3;
-      GetCanvas().parentNode.style.width = 120*3;
-      GetCanvas().parentNode.style.height = 90*3;
+      w = 600;
+      h = 450;
     }
 
+    if (size == "small")
+    {
+      w = 300;
+      h = 225;
+    }
+
+    GetCanvas().width = w;
+    GetCanvas().height = h;
+    GetCanvas().parentNode.style.width = w;
+    GetCanvas().parentNode.style.height = h
 
     timer(Draw, "Draw");
   }
