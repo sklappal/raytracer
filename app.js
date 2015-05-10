@@ -22,6 +22,10 @@ function App() {
   var drawStart;
 
   function Draw() {
+
+    var canvas = GetCanvas();
+    var context = canvas.getContext('2d');
+  
     currentImageData = CreateImageData();
     drawStart = Now();
     DrawInternal();
@@ -37,7 +41,8 @@ function App() {
       for(y = 0; y < Height(); y++)
       {
         var color = Raytrace(vec2.fromValues(x, y));
-        SetPixel(currentImageData, x, y, color, 1.0);
+        if (color != undefined)
+          SetPixel(currentImageData, x, y, color, 1.0);
       }
       currentProgress = x / Width();
       if (Now() - startTime > 100)
@@ -80,14 +85,11 @@ function App() {
       return CalculateLighting(nearest.isec, nearest.ball);
     }
     
-    return Vec3(0.0, 0.0, 0.0);
+    return undefined;
   }
 
   function CalculateLighting(isec, ball)
   {
-
-
-
       var lightingScaler = CalculateLightingScaler(isec.firstPos, isec.firstNormal, ball);
       var color = Vec3(0.0, 0.0, 0.0);
       specular = Vec3(1.0, 1.0, 1.0);
@@ -196,17 +198,14 @@ function App() {
   }
 
   this.Start = function(size) {
-    GetCanvas().style.backgroundColor = "#ffffff";
-    document.body.style.backgroundColor = "#ffffff";
 
-    var w = 1200;
-    var h = 900;
+    var w = 600;
+    var h = 450;
 
-
-    if (size == "medium")
+    if (size == "large")
     {
-      w = 600;
-      h = 450;
+      w = 1200;
+      h = 900;
     }
 
     if (size == "small")
