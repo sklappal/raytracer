@@ -18,24 +18,52 @@ function ball(pos, radius, color, id)
 
       if (d < 0.0)
       {
+        // no intersections
         return { count: 0};
       }
 
-      var f = ray.parameterizedPoint(- dot - Math.sqrt(d));
-      var s = ray.parameterizedPoint(- dot + Math.sqrt(d));
+      var first = - dot - Math.sqrt(d);
+      var second = - dot + Math.sqrt(d);
+      
+      var firstIntersection = ray.parameterizedPoint(first);
+      var secondIntersection = ray.parameterizedPoint(second);
 
-      var firstNormal = vec3.create();
-      vec3.subtract(firstNormal, f, this.pos);
-      vec3.normalize(firstNormal, firstNormal);
-      var fr = GetReflection(ray.direction, firstNormal)
+      var intersectionPos;
+      if (first < 0)
+      {
+        if (second < 0)
+        {
+          // Both points behind ray origin
+          return {count: 0};
+        }
+        // first point behind ray origin
+        intersectionPos = secondIntersection;
+      } 
+      else if (second < 0)
+      {
+        // second point behind ray origin
+        intersectionPos = firstIntersection;
+      }
+      else
+      {
+        // Two intersections in front of us, take nearest
+        if (vec3.squaredDistance(firstIntersection, ray.origin) < vec3.squaredDistance(secondIntersection, ray.origin))
+        {
+          intersectionPos = firstIntersection;
+        }
+        else
+        {
+          intersectionPos = secondIntersection;
+        }
+      }
 
-      var secondNormal = vec3.create();
-      vec3.subtract(secondNormal, f, this.pos);
-      vec3.normalize(secondNormal, secondNormal);
-      var sr = GetReflection(ray.direction, secondNormal);
+      var normal = vec3.create();
+      vec3.subtract(normal, intersectionPos, this.pos);
+      vec3.normalize(normal, normal);
 
-      return {count : 2, firstPos: f, firstNormal: firstNormal, firstReflection: fr, secondPos: s, secondNormal: secondNormal, secondReflection: sr}
+      var reflection = GetReflection(ray.direction, normal);
 
+      return {count : 1, pos: intersectionPos, normal: normal, reflection: reflection}
     }
 
     function GetReflection(incidentRay, planeNormal)

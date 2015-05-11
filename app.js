@@ -5,16 +5,16 @@ function App() {
 
   var phong_exponent = 100;
 
-  var balls = [
+  var items = [
     new ball(Vec3(-1.5, -1.0, 5.0), 1.0, Vec3(1.0, 0.0, 0.0), 1),
     new ball(Vec3(1.5, -1.0, 5.0), 1.0, Vec3(0.0, 1.0, 0.0), 2),
     new ball(Vec3(0.0, 1.0, 5.0), 1.0, Vec3(0.0, 0.0, 1.0), 3),
-    new ball(Vec3(0.0, -0.2, 3.0), 0.2, Vec3(1.0, 1.0, 1.0), 4),
-    
-
+    new ball(Vec3(0.0, 0.0, 4.0), 0.2, Vec3(1.0, 1.0, 1.0), 4),
+    new quad(Vec3(3.5, 3.5, 7.0), Vec3(3.5, -3.5,  7.0), Vec3(-3.5, 3.5,  7.0), Vec3(1.0, 1.0, 1.0), 5),
+    new quad(Vec3(1.5, 2.0, 6.0), Vec3(1.5, -2.0,  6.0), Vec3(-1.5, 2.0,  6.0), Vec3(0.0, 0.8, 0.8), 6)
   ];
 
-  var lightPos = vec3.fromValues(2.0, 0.0, 0.0);
+  var lightPos = vec3.fromValues(2.0, 0.0,  0.0);
 
   var currentImageData;
   var currentProgress = 0.0;
@@ -48,6 +48,7 @@ function App() {
       if (Now() - startTime > 100)
       {
         currentLine = x + 1;
+        PutImageData(currentImageData);
         setTimeout(DrawInternal, 1);
         return;
       }
@@ -62,21 +63,21 @@ function App() {
     var dir = ImagePixelToWorld(pix);
 
     var nearest = undefined;
-    for (i = 0; i < balls.length; i++)
+    for (i = 0; i < items.length; i++)
     {
-      var isec = balls[i].intersection(new ray(Vec3(0.0, 0.0, 0.0), dir));
+      var isec = items[i].intersection(new ray(Vec3(0.0, 0.0, 0.0), dir));
       if (isec.count > 0)
       {
         if (nearest == undefined)
         {
-          nearest = {isec: isec, ball: balls[i] };
+          nearest = {isec: isec, ball: items[i] };
           continue;
         }
-        var cur_dist = vec3.squaredLength(isec.firstPos);
-        var nearest_dist = vec3.squaredLength(nearest.isec.firstPos);
+        var cur_dist = vec3.squaredLength(isec.pos);
+        var nearest_dist = vec3.squaredLength(nearest.isec.pos);
         if (cur_dist < nearest_dist )
         {
-          nearest = {isec: isec, ball: balls[i] };
+          nearest = {isec: isec, ball: items[i] };
         }
       }
     }
@@ -90,7 +91,7 @@ function App() {
 
   function CalculateLighting(isec, ball)
   {
-      var lightingScaler = CalculateLightingScaler(isec.firstPos, isec.firstNormal, ball);
+      var lightingScaler = CalculateLightingScaler(isec.pos, isec.normal, ball);
       var color = Vec3(0.0, 0.0, 0.0);
       specular = Vec3(1.0, 1.0, 1.0);
       var phong = Math.pow(lightingScaler, phong_exponent);
@@ -115,19 +116,18 @@ function App() {
 
     vec3.normalize(lightToPos, lightToPos);
 
-    for (i = 0; i < balls.length; i++)
+    for (i = 0; i < items.length; i++)
     {
-      if (balls[i].id == ball.id)
+      if (items[i].id == ball.id)
       {
         continue;
       }
-      var isec = balls[i].intersection(new ray(lightPos, lightToPos));
-      if (isec.count > 1)
+      var isec = items[i].intersection(new ray(lightPos, lightToPos));
+      if (isec.count > 0)
       {
-        var dist1 = vec3.squaredDistance(lightPos, isec.firstPos);
-        var dist2 = vec3.squaredDistance(lightPos, isec.secondPos);
+        var dist = vec3.squaredDistance(lightPos, isec.pos);
         var isecDist = vec3.squaredDistance(lightPos, reflectionPos);
-        if (dist1 < isecDist || dist2 < isecDist)
+        if (dist < isecDist)
         {
           return 0.0; // in the shadooooows
         }
