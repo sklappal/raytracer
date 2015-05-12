@@ -1,5 +1,5 @@
 // corners are clockwise
-function quad(corner1, corner2, corner3, color, id)
+function quad(corner1, corner2, corner3, material, id)
 {
     var s = vec3.create();
     var t = vec3.create();
@@ -15,7 +15,7 @@ function quad(corner1, corner2, corner3, color, id)
     this.s = s;
     this.t = t;
 
-    this.color = color;
+    this.material = material;
     this.id = id;
 
     this.intersection = function(ray)
@@ -34,7 +34,7 @@ function quad(corner1, corner2, corner3, color, id)
 
       var t = vec3.dot(rayToPlaneOrigin, this.normal) / dot;
 
-      if (t < 0)
+      if (t < 1e-3)
       {
         return {count: 0}
       }
@@ -56,7 +56,10 @@ function quad(corner1, corner2, corner3, color, id)
         return { count: 0}
       }
 
-      return { count: 1, pos: intersectionPoint, normal: this.normal, reflection: GetReflection(ray.direction, this.normal)}
+      var neg = vec3.create();
+      vec3.negate(neg, ray.direction);
+
+      return { count: 1, pos: intersectionPoint, normal: this.normal, reflection: GetReflection(neg, this.normal), material: this.material, itemId: this.id}
     }
 
     function GetReflection(incidentRay, planeNormal)

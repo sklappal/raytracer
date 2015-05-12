@@ -1,9 +1,9 @@
-function ball(pos, radius, color, id)
+function ball(pos, radius, material, id)
 {
     this.pos = pos;
     this.radius = radius;
     this.radiusSqr = radius * radius;
-    this.color = color;
+    this.material = material;
     this.id = id;
 
     this.intersection = function(ray)
@@ -29,9 +29,9 @@ function ball(pos, radius, color, id)
       var secondIntersection = ray.parameterizedPoint(second);
 
       var intersectionPos;
-      if (first < 0)
+      if (first < 1e-3)
       {
-        if (second < 0)
+        if (second < 1e-3)
         {
           // Both points behind ray origin
           return {count: 0};
@@ -39,7 +39,7 @@ function ball(pos, radius, color, id)
         // first point behind ray origin
         intersectionPos = secondIntersection;
       } 
-      else if (second < 0)
+      else if (second < 1e-3)
       {
         // second point behind ray origin
         intersectionPos = firstIntersection;
@@ -61,9 +61,12 @@ function ball(pos, radius, color, id)
       vec3.subtract(normal, intersectionPos, this.pos);
       vec3.normalize(normal, normal);
 
-      var reflection = GetReflection(ray.direction, normal);
+      var neg = vec3.create();
+      vec3.negate(neg, ray.direction);
 
-      return {count : 1, pos: intersectionPos, normal: normal, reflection: reflection}
+      var reflection = GetReflection(neg, normal);
+
+      return {count : 1, pos: intersectionPos, normal: normal, reflection: reflection, material: this.material, itemId: this.id}
     }
 
     function GetReflection(incidentRay, planeNormal)
