@@ -23,7 +23,7 @@ function App() {
     new ball(Vec3(1.5, -1.0, 5.0), 1.0, materials["green"], 2),
     new ball(Vec3(0.0, 1.0, 5.0), 1.0, materials["blue"], 3),
     new ball(Vec3(0.0, 0.0, 4.0), 0.2, materials["white"], 4),
-    new quad(Vec3(3.5, 3.5, 7.0), Vec3(3.5, -3.5,  7.0), Vec3(-3.5, 3.5,  7.0), materials["white"], 5),
+    new quad(Vec3(3.2, 2.7, 7.0), Vec3(3.2, -2.7,  7.0), Vec3(-3.2, 2.7,  7.0), materials["white"], 5),
     new quad(Vec3(1.5, 2.0, 6.0), Vec3(1.5, -2.0,  6.0), Vec3(-1.5, 2.0,  5.0), materials["turquoise"], 6),
   ];
 
