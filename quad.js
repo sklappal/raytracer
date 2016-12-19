@@ -15,6 +15,9 @@ function quad(corner1, corner2, corner3, material, id)
     this.s = s;
     this.t = t;
 
+    this.squaredLengthS = vec3.squaredLength(this.s);
+    this.squaredLengthT = vec3.squaredLength(this.t);
+
     this.material = material;
     this.id = id;
 
@@ -45,29 +48,26 @@ function quad(corner1, corner2, corner3, material, id)
       vec3.subtract(testPoint, intersectionPoint, this.origin);
 
       var projection = vec3.dot(this.s, testPoint);
-      if (projection < 0 || projection > vec3.squaredLength(this.s))
+      if (projection < 0 || projection > this.squaredLengthS)
       {
         return { count: 0}
       }
 
       var projection = vec3.dot(this.t, testPoint);
-      if (projection < 0 || projection > vec3.squaredLength(this.t))
+      if (projection < 0 || projection > this.squaredLengthT)
       {
         return { count: 0}
       }
 
-      var neg = vec3.create();
-      vec3.negate(neg, ray.direction);
-
-      return { count: 1, pos: intersectionPoint, normal: this.normal, reflection: GetReflection(neg, this.normal), material: this.material, itemId: this.id}
+      return { count: 1, pos: intersectionPoint, normal: this.normal, reflection: GetReflection(ray.direction, this.normal), material: this.material, itemId: this.id}
     }
 
     function GetReflection(incidentRay, planeNormal)
     {
-      var dot = vec3.dot(incidentRay, planeNormal);
+      var dot = -vec3.dot(incidentRay, planeNormal);
       var ret = vec3.create();
       vec3.scale(ret, planeNormal, dot * 2);
-      vec3.subtract(ret, ret, incidentRay);
+      vec3.add(ret, ret, incidentRay);
       return ret;
     }
 

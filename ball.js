@@ -22,11 +22,10 @@ function ball(pos, radius, material, id)
         return { count: 0};
       }
 
-      var first = - dot - Math.sqrt(d);
-      var second = - dot + Math.sqrt(d);
-      
-      var firstIntersection = ray.parameterizedPoint(first);
-      var secondIntersection = ray.parameterizedPoint(second);
+      var sqrtD = Math.sqrt(d);
+
+      var first = - dot - sqrtD;
+      var second = - dot + sqrtD;
 
       var intersectionPos;
       if (first < 1e-3)
@@ -37,15 +36,19 @@ function ball(pos, radius, material, id)
           return {count: 0};
         }
         // first point behind ray origin
-        intersectionPos = secondIntersection;
+        intersectionPos = ray.parameterizedPoint(second);
       } 
       else if (second < 1e-3)
       {
         // second point behind ray origin
-        intersectionPos = firstIntersection;
+        intersectionPos = ray.parameterizedPoint(first);
       }
       else
       {
+        
+        var firstIntersection = ray.parameterizedPoint(first);
+        var secondIntersection = ray.parameterizedPoint(second);
+
         // Two intersections in front of us, take nearest
         if (vec3.squaredDistance(firstIntersection, ray.origin) < vec3.squaredDistance(secondIntersection, ray.origin))
         {
@@ -61,20 +64,17 @@ function ball(pos, radius, material, id)
       vec3.subtract(normal, intersectionPos, this.pos);
       vec3.normalize(normal, normal);
 
-      var neg = vec3.create();
-      vec3.negate(neg, ray.direction);
-
-      var reflection = GetReflection(neg, normal);
+      var reflection = GetReflection(ray.direction, normal);
 
       return {count : 1, pos: intersectionPos, normal: normal, reflection: reflection, material: this.material, itemId: this.id}
     }
 
     function GetReflection(incidentRay, planeNormal)
     {
-      var dot = vec3.dot(incidentRay, planeNormal);
+      var dot = -vec3.dot(incidentRay, planeNormal);
       var ret = vec3.create();
       vec3.scale(ret, planeNormal, dot * 2);
-      vec3.subtract(ret, ret, incidentRay);
+      vec3.add(ret, ret, incidentRay);
       return ret;
     }
 

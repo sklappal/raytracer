@@ -10,21 +10,25 @@ function App() {
   var materials = 
   {
     red: new material(Vec3(1.0, 0.0, 0.0), 0.3),
-    blue: new material(Vec3(0.0, 0.0, 1.0), 0.0),
+    blue: new material(Vec3(0.0, 0.0, 1.0), 0.0),    
     green: new material(Vec3(0.0, 1.0, 0.0), 0.5),
-    white: new material(Vec3(1.0, 1.0, 1.0), 0),
+    white: new material(Vec3(1.0, 1.0, 1.0), 0.0),
+    whiteReflective: new material(Vec3(1.0, 1.0, 1.0), 0.9),
     turquoise: new material(Vec3(0.0, 0.8, 0.8), 0.8)
   };
 
   var lightPos = vec3.fromValues(2.0, 0.0,  0.0);
-
+  var lightId = 100;
   var items = [
     new ball(Vec3(-1.5, -1.0, 5.0), 1.0, materials["red"], 1),
     new ball(Vec3(1.5, -1.0, 5.0), 1.0, materials["green"], 2),
     new ball(Vec3(0.0, 1.0, 5.0), 1.0, materials["blue"], 3),
-    new ball(Vec3(0.0, 0.0, 4.0), 0.2, materials["white"], 4),
-    new quad(Vec3(3.2, 2.7, 7.0), Vec3(3.2, -2.7,  7.0), Vec3(-3.2, 2.7,  7.0), materials["white"], 5),
+    new ball(Vec3(0.0, -0.5, 5.0), 0.2, materials["whiteReflective"], 4),
+    new quad(Vec3(3.2, 2.7, 7.0), Vec3(3.2, -2.7,  7.0), Vec3(-3.2, 2.7,  7.0), materials["white"], 5),  
     new quad(Vec3(1.5, 2.0, 6.0), Vec3(1.5, -2.0,  6.0), Vec3(-1.5, 2.0,  5.0), materials["turquoise"], 6),
+    //light
+    //new ball(lightPos, 0.1, materials["white"], lightId)
+
   ];
 
   var currentImageData;
@@ -45,7 +49,7 @@ function App() {
   function DrawInternal()
   {
     ClearCanvas();
-    FillText("Ray tracing (" + (currentProgress * 100).toFixed(2)  + "%) ...", 100, 100);
+    
     var startTime = Now(); 
     for(y = currentLine; y < Height(); y++)
     {
@@ -55,12 +59,16 @@ function App() {
         var color = Raytrace(new ray(Vec3(0.0, 0.0, 0.0), dir), 4);
         if (color != undefined)
           SetPixel(currentImageData, x, y, color, 1.0);
+        //else
+        //  SetPixel(currentImageData, x, y, Vec3(1.0, 0.5, 0.5), 1.0) debug coloring
       }
-      currentProgress = x / Width();
       if (Now() - startTime > 100)
       {
         currentLine = y + 1;
         PutImageData(currentImageData);
+
+        currentProgress = y / Height();
+        FillText("Ray tracing (" + (currentProgress * 100).toFixed(2)  + "%) ...", 100, 100);
         setTimeout(DrawInternal, 1);
         return;
       }
@@ -103,10 +111,10 @@ function App() {
       if (isec.material.reflectivity > 0)
       {
         var reflectionRay = new ray(isec.pos, isec.reflection);
-        var ret = Raytrace(reflectionRay, level-1);
-        if (ret != undefined)
+        var reflection = Raytrace(reflectionRay, level-1);
+        if (reflection != undefined)
         {
-          vec3.scale(reflectionColor, ret, isec.material.reflectivity)
+          vec3.scale(reflectionColor, reflection, isec.material.reflectivity)
         }
       }
 
@@ -146,9 +154,11 @@ function App() {
 
     vec3.normalize(lightToPos, lightToPos);
 
+    var shadow = 1.0;
+
     for (i = 0; i < items.length; i++)
     {
-      if (items[i].id == id)
+      if (items[i].id == id || items[i].id == lightId)
       {
         continue;
       }
@@ -160,13 +170,15 @@ function App() {
         var isecDist = vec3.squaredDistance(lightPos, reflectionPos);
         if (dist < isecDist)
         {
-          return 0.0; // in the shadooooows
+          return 0.0;
         }
       }
     }
 
+    shadow = Math.max(0.0, shadow)
+
     var cos = vec3.dot(reflectionNormal, lightToPos);
-    return -1.0 * Math.min(0.0, cos);
+    return -1.0 * Math.min(0.0, cos) * shadow;
   }
 
   function ImagePixelToWorld(pix)
@@ -232,6 +244,12 @@ function App() {
 
     var w = 600;
     var h = 450;
+
+    if (size == "extralarge")
+    {
+      w = 2400;
+      h = 1800; 
+    }
 
     if (size == "large")
     {

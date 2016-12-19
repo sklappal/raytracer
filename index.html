@@ -11,16 +11,16 @@
     <script type="text/javascript" src="gl-matrix.js"></script>
     <script type="text/javascript" src="app.js"></script>
     <script type="text/javascript">
-    function Start() {
-        App().Start(getParameterByName("size"));
-    }
+        function Start() {
+            App().Start(getParameterByName("size"));
+        }
 
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-        results = regex.exec(location.search);
-        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
 
     </script>
     <style>
@@ -34,7 +34,11 @@
 
     <div style="width: 1200px; height: 900px; top: 0px; bottom: 0; left: 0; right: 0; margin-left: auto; margin-right: auto;">
         
-        <p>[ <a href="index.html?size=large" style="color: white">Large</a> ] [ <a href="index.html?size=medium" style="color: white">Medium</a> ] [<a href="index.html?size=small" style="color: white">Small</a>]</p>
+        <p>
+            [ <a href="index.html?size=extralarge" style="color: white">Extralarge</a> ]
+            [ <a href="index.html?size=large" style="color: white">Large</a> ]
+             [ <a href="index.html?size=medium" style="color: white">Medium</a> ] 
+             [<a href="index.html?size=small" style="color: white">Small</a>]</p>
 
         <br/>
         <canvas id="canvas" width="1200" height="900" style="border: 1px solid black">&nbsp;</canvas>
