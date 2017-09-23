@@ -3,10 +3,9 @@ function ray(origin, direction)
   this.origin = origin;
   this.direction = direction;
 
-  this.parameterizedPoint = function(t)
+  this.parameterizedPoint = function(vec, t)
   {
-    var ret = vec3.create();
-    return vec3.scaleAndAdd(ret, this.origin, this.direction, t);
+    return vec3.scaleAndAdd(vec, this.origin, this.direction, t);
   }
 
 }

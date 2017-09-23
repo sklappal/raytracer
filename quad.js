@@ -21,6 +21,9 @@ function quad(corner1, corner2, corner3, material, id)
     this.material = material;
     this.id = id;
 
+    this.workVector = vec3.create();
+    this.intersectionPoint = vec3.create();
+
     this.intersection = function(ray)
     {
       var dot = vec3.dot(this.normal, ray.direction);
@@ -32,20 +35,20 @@ function quad(corner1, corner2, corner3, material, id)
 
       // dot(n, x0-r0) / dot(n0, d)
 
-      var rayToPlaneOrigin = vec3.create();
-      vec3.subtract(rayToPlaneOrigin, this.origin, ray.origin);
+      vec3.subtract(this.workVector, this.origin, ray.origin);
 
-      var t = vec3.dot(rayToPlaneOrigin, this.normal) / dot;
+      var t = vec3.dot(this.workVector, this.normal) / dot;
 
       if (t < 1e-3)
       {
         return {count: 0}
       }
 
-      var intersectionPoint = ray.parameterizedPoint(t);
+//      console.log(this.intersectionPoint);
+      this.intersectionPoint = ray.parameterizedPoint(this.intersectionPoint, t);
 
-      var testPoint = vec3.create();
-      vec3.subtract(testPoint, intersectionPoint, this.origin);
+      var testPoint = this.workVector;
+      vec3.subtract(testPoint, this.intersectionPoint, this.origin);
 
       var projection = vec3.dot(this.s, testPoint);
       if (projection < 0 || projection > this.squaredLengthS)
@@ -59,7 +62,7 @@ function quad(corner1, corner2, corner3, material, id)
         return { count: 0}
       }
 
-      return { count: 1, pos: intersectionPoint, normal: this.normal, reflection: GetReflection(ray.direction, this.normal), material: this.material, itemId: this.id}
+      return { count: 1, pos: this.intersectionPoint, normal: this.normal, reflection: GetReflection(ray.direction, this.normal), material: this.material, itemId: this.id}
     }
 
     function GetReflection(incidentRay, planeNormal)

@@ -5,6 +5,8 @@ function ball(pos, radius, material, id)
     this.radiusSqr = radius * radius;
     this.material = material;
     this.id = id;
+    this.intersectionPoint1 = vec3.create();
+    this.intersectionPoint2 = vec3.create();
 
     this.intersection = function(ray)
     {
@@ -36,18 +38,18 @@ function ball(pos, radius, material, id)
           return {count: 0};
         }
         // first point behind ray origin
-        intersectionPos = ray.parameterizedPoint(second);
+        intersectionPos = ray.parameterizedPoint(this.intersectionPoint1, second);
       } 
       else if (second < 1e-3)
       {
         // second point behind ray origin
-        intersectionPos = ray.parameterizedPoint(first);
+        intersectionPos = ray.parameterizedPoint(this.intersectionPoint1, first);
       }
       else
       {
         
-        var firstIntersection = ray.parameterizedPoint(first);
-        var secondIntersection = ray.parameterizedPoint(second);
+        var firstIntersection = ray.parameterizedPoint(this.intersectionPoint1, first);
+        var secondIntersection = ray.parameterizedPoint(this.intersectionPoint2, second);
 
         // Two intersections in front of us, take nearest
         if (vec3.squaredDistance(firstIntersection, ray.origin) < vec3.squaredDistance(secondIntersection, ray.origin))
