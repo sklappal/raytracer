@@ -3,6 +3,8 @@ function App() {
   var VIEWPORT_WIDTH = 1.2;
   var VIEWPORT_HEIGTH = 0.9;
 
+  var CANVAS = document.getElementById("canvas");
+
   var phong_exponent = 100;
 
   var AMBIENT = Vec3(0.05, 0.05, 0.05);
@@ -37,10 +39,6 @@ function App() {
   var drawStart;
 
   function Draw() {
-
-    var canvas = GetCanvas();
-    var context = canvas.getContext('2d');
-  
     currentImageData = CreateImageData();
     drawStart = Now();
     DrawInternal();
@@ -62,7 +60,7 @@ function App() {
         //else
         //  SetPixel(currentImageData, x, y, Vec3(1.0, 0.5, 0.5), 1.0) debug coloring
       }
-      if (Now() - startTime > 100)
+      if (Now() - startTime > 400)
       {
         currentLine = y + 1;
         PutImageData(currentImageData);
@@ -208,7 +206,7 @@ function App() {
   }
 
   function GetCanvas() {
-    return document.getElementById("canvas");
+    return CANVAS;
   }
 
   function Width()
@@ -273,7 +271,7 @@ function App() {
 
   function Vec3(x, y, z)
   {
-    return vec3.fromValues(x, y, z);
+    return [x, y, z];
   }
 
   function Now()
