@@ -33,12 +33,44 @@ function App() {
 
   ];
 
+  var currentSize = "medium";
+  var currentAntialias = 1;
+  var cancelCallback;
   var currentImageData;
   var currentProgress = 0.0;
   var currentLine = 0;
   var drawStart;
 
+  document.forms.myForm.addEventListener('change', function(e) {  
+    if (e.target.name === "size")
+    {
+      currentSize = e.target.value;
+    }
+    if (e.target.name === "antialias")
+    {
+      currentAntialias = Number(e.target.value);
+    }
+
+    console.log("drawStart: ", drawStart)
+    console.log("cancelCallback: ", cancelCallback)
+    console.log("currentSize: ", currentSize)
+    console.log("currentAntialias: ", currentAntialias)
+    if (drawStart === undefined) // not actively drawing
+    {
+      Start();
+    }
+    else
+    {
+      cancelCallback = Start;
+    }
+
+  });
+
+
   function Draw() {
+    currentLine = 0;
+    currentProgress = 0.0;
+    currentLine = 0;
     currentImageData = CreateImageData();
     drawStart = Now();
     DrawInternal();
@@ -53,12 +85,15 @@ function App() {
     {
       for(x = 0; x < Width(); x++)
       {
-        var dir = ImagePixelToWorld(vec2.fromValues(x, y));
-        var color = Raytrace(new ray(Vec3(0.0, 0.0, 0.0), dir), 4);
-        if (color != undefined)
-          SetPixel(currentImageData, x, y, color, 1.0);
-        //else
-        //  SetPixel(currentImageData, x, y, Vec3(1.0, 0.5, 0.5), 1.0) debug coloring
+        var color = RaytracePixel(x, y, currentAntialias);
+        SetPixel(currentImageData, x, y, color, 1.0);
+
+        if (cancelCallback != undefined) // cancel requested, jump to the callback
+        {
+          setTimeout(cancelCallback, 1);
+          cancelCallback = undefined;
+          return;
+        }
       }
       if (Now() - startTime > 400)
       {
@@ -73,8 +108,33 @@ function App() {
     }
     PutImageData(currentImageData);
     console.log("Draw took " + (Now() - drawStart) / 1000 + " s.");
+    drawStart = undefined;
   }
 
+  function RaytracePixel(x, y, antialiasLevel)
+  {
+    var dirs = [];
+    for (var i = 0; i < antialiasLevel; i++)
+    {
+      for (var j = 0; j < antialiasLevel; j++)
+      {
+        dirs.push([x + 1.0 / antialiasLevel * i, y + 1.0 / antialiasLevel * j]);
+      }
+    }
+
+    var color = [0.0, 0.0, 0.0];
+    var sampleCount = dirs.length;
+    for (var i = 0; i < sampleCount; i++)
+    {
+      var dir = ImagePixelToWorld(vec2.fromValues(dirs[i][0], dirs[i][1]));    
+      var currentColor = Raytrace(new ray(Vec3(0.0, 0.0, 0.0), dir), 4);
+      color = [
+        color[0] + currentColor[0] / sampleCount, 
+        color[1] + currentColor[1] / sampleCount, 
+        color[2] + currentColor[2] / sampleCount];
+    }
+    return color;
+  }
 
   function Raytrace(currentRay, level)
   {
@@ -121,7 +181,7 @@ function App() {
       return vec3.add(myColor, myColor, reflectionColor);
     }
     
-    return undefined;
+    return Vec3(0.0, 0.0, 0.0);
   }
 
   function CalculateLighting(isec)
@@ -194,6 +254,8 @@ function App() {
     ctx.font = "bold 16px Segoe UI";
     ctx.fillStyle = "#ff0000";
     ctx.fillText(text, xpos, ypos);
+    ctx.strokeStyle ="#000000";
+    ctx.strokeText(text, xpos, ypos);
   }
 
   function ClearCanvas() {
@@ -238,35 +300,59 @@ function App() {
     imageData.data[index+3] = Math.max(Math.min(a * 255, 255), 0);
   }
 
-  this.Start = function(size) {
+  this.Start = function() {
 
-    var w = 600;
-    var h = 450;
-
-    if (size == "extralarge")
+    var w,h;
+    if (currentSize == "extralarge")
     {
       w = 2400;
-      h = 1800; 
+      h = 1800;
+      this.document.getElementById("11").checked = true;
     }
 
-    if (size == "large")
+    if (currentSize == "large")
     {
       w = 1200;
       h = 900;
+      this.document.getElementById("12").checked = true;
     }
 
-    if (size == "small")
+    if (currentSize == "medium")
+    {
+      w = 600;
+      h = 450;
+      this.document.getElementById("13").checked = true;
+    }
+
+    if (currentSize == "small")
     {
       w = 300;
       h = 225;
+      this.document.getElementById("14").checked = true;
     }
+
+    if (currentAntialias == 1)
+    {
+      this.document.getElementById("21").checked = true;
+    }
+
+    if (currentAntialias == 2)
+    {
+      this.document.getElementById("22").checked = true;
+    }
+
+    if (currentAntialias == 3)
+    {
+      this.document.getElementById("23").checked = true;
+    }
+
 
     GetCanvas().width = w;
     GetCanvas().height = h;
     GetCanvas().parentNode.style.width = w;
     GetCanvas().parentNode.style.height = h
 
-    timer(Draw, "Draw");
+    Draw();
   }
 
   function Vec3(x, y, z)
@@ -277,13 +363,6 @@ function App() {
   function Now()
   {
     return new Date().getTime();
-  }
-
-  function timer(f, name)
-  {
-    var time = Now();
-    f();
-    console.log(name + " took " + (Now() - time) / 1000 + " s.");
   }
 
   return this;

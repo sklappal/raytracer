@@ -11,37 +11,49 @@
     <script type="text/javascript" src="gl-matrix.js"></script>
     <script type="text/javascript" src="app.js"></script>
     <script type="text/javascript">
+        
+        var app;
         function Start() {
-            App().Start(getParameterByName("size"));
+            if (app === undefined)
+            {
+                app = App();
+            }
+            app.Start();
         }
 
-        function getParameterByName(name) {
-            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-            results = regex.exec(location.search);
-            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-        }
 
     </script>
     <style>
-    p, a {
-        color: white;
-        text-align: center;
+    input {
+        margin-left: 20px;
     }
     </style>
 </head>
 <body onload="Start();" style="background: #000000">
 
-    <div style="width: 1200px; height: 900px; top: 0px; bottom: 0; left: 0; right: 0; margin-left: auto; margin-right: auto;">
+    <div style="top: 0px; bottom: 0; left: 0; right: 0; margin-left: auto; margin-right: auto;">
+         <form name="myForm" action="" style="min-width: 350px">             
+            <table style="color: white; margin-left: auto; margin-right: auto; min-width: 450px">
+                <tr>
+                    <td style="text-align: right">Size</td>
+                    <td><input type="radio" name="size" id="14" value="small">Small</td>
+                    <td><input type="radio" name="size" id="13" value="medium">Medium</td>
+                    <td><input type="radio" name="size" id="12" value="large">Large</td>
+                    <td><input type="radio" name="size" id="11" value="extralarge">Extralarge</td>
+                </tr>
+                <tr>
+                    <td>Anti-aliasing</td>
+                    <td><input type="radio" name="antialias" id="21" value="1">None</td>
+                    <td><input type="radio" name="antialias" id="22" value="2">4 x</td>
+                    <td><input type="radio" name="antialias" id="23" value="3">16 x</td>
+                </tr>
+            </table>
+        </form>
         
-        <p>
-            [ <a href="index.html?size=extralarge" style="color: white">Extralarge</a> ]
-            [ <a href="index.html?size=large" style="color: white">Large</a> ]
-             [ <a href="index.html?size=medium" style="color: white">Medium</a> ] 
-             [<a href="index.html?size=small" style="color: white">Small</a>]</p>
-
         <br/>
-        <canvas id="canvas" width="1200" height="900" style="border: 1px solid black">&nbsp;</canvas>
+        <div style="margin-left: auto; margin-right: auto;">
+            <canvas id="canvas" width="1200" height="900" style="border: 1px solid black">&nbsp;</canvas>
+        </div>
     </div>
 </body>
 </html>
